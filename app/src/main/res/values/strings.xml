@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">GitGit</string>
+    <string name="app_icon_description">App icon</string>
+    <string name="search">Search</string>
+    <string name="search_username">Search by username</string>
+    <string name="skeleton">Skeleton</string>
+    <string name="tab_text_1">Followers</string>
+    <string name="tab_text_2">Following</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="user_profile_picture">User Profile Picture</string>
+    <string name="follow_icon_desc">Follow Icon</string>
+    <string name="follow_tab_layout_desc">Follow Tab Layout</string>
+    <string name="username_not_found">Username not found.</string>
+    <string name="detail">Detail</string>
+    <string name="app_icon">App Icon</string>
+</resources>
