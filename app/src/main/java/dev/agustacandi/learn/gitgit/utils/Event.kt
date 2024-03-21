@@ -2,9 +2,7 @@ package dev.agustacandi.learn.gitgit.utils
 
 open class Event<out T>(private val content: T) {
 
-    @Suppress("MemberVisibilityCanBePrivate")
-    var hasBeenHandled = false
-        private set
+    private var hasBeenHandled = false
     fun getContentIfNotHandled(): T? {
         return if (hasBeenHandled) {
             null

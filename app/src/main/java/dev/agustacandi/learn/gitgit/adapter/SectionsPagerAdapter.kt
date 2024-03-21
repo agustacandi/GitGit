@@ -1,4 +1,4 @@
-package dev.agustacandi.learn.gitgit.data.adapter
+package dev.agustacandi.learn.gitgit.adapter
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

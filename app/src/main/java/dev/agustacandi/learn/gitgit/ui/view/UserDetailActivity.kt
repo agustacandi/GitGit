@@ -1,66 +1,110 @@
 package dev.agustacandi.learn.gitgit.ui.view
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
+import coil.load
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dev.agustacandi.learn.gitgit.R
-import dev.agustacandi.learn.gitgit.data.adapter.SectionsPagerAdapter
-import dev.agustacandi.learn.gitgit.data.response.DetailUserResponse
+import dev.agustacandi.learn.gitgit.adapter.SectionsPagerAdapter
+import dev.agustacandi.learn.gitgit.data.remote.response.DetailUserResponse
 import dev.agustacandi.learn.gitgit.databinding.ActivityUserDetailBinding
+import dev.agustacandi.learn.gitgit.model.UserFavorite
+import dev.agustacandi.learn.gitgit.utils.toDecimalFormat
 import dev.agustacandi.learn.gitgit.ui.viewmodel.DetailViewModel
-import java.text.DecimalFormat
+import dev.agustacandi.learn.gitgit.ui.viewmodel.UserFavoriteViewModel
+import dev.agustacandi.learn.gitgit.ui.viewmodel.UserFavoriteViewModelFactory
 
 class UserDetailActivity : AppCompatActivity() {
 
     private lateinit var activityUserDetailBinding: ActivityUserDetailBinding
     private val detailViewModel by viewModels<DetailViewModel>()
+    private var userDetailResponse = DetailUserResponse()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityUserDetailBinding = ActivityUserDetailBinding.inflate(layoutInflater)
         setContentView(activityUserDetailBinding.root)
 
+        val userFavoriteViewModelFactory = UserFavoriteViewModelFactory.getInstance(this)
+        val userFavoriteViewModel: UserFavoriteViewModel by viewModels {
+            userFavoriteViewModelFactory
+        }
+        var isUserFavoriteNotEmpty = false
+
         val username = intent.extras?.getString("username")
 
-        if (detailViewModel.userDetail.value == null) {
-            detailViewModel.getUserDetail(username!!)
-        }
+        setupSectionPager(username)
+        setupAppBar()
 
-        detailViewModel.userDetail.observe(this) {
-            setUserDetail(it!!)
-        }
+        with(detailViewModel) {
+            if (userDetail.value == null) {
+                getUserDetail(username ?: "a")
+            }
 
-        detailViewModel.loader.observe(this) {
-            showLoader(it)
-        }
+            userDetail.observe(this@UserDetailActivity) { detailUserResponse ->
+                setUserDetail(detailUserResponse)
+                userDetailResponse = detailUserResponse
+            }
 
-        detailViewModel.snackbarText.observe(this) {
-            it.getContentIfNotHandled()?.let { snackBarText ->
-                Snackbar.make(window.decorView.rootView, snackBarText, Snackbar.LENGTH_SHORT).show()
+            loader.observe(this@UserDetailActivity) { isLoading ->
+                showLoader(isLoading)
+            }
+
+            snackbarText.observe(this@UserDetailActivity) { eventString ->
+                eventString.getContentIfNotHandled()?.let { snackBarText ->
+                    Snackbar.make(window.decorView.rootView, snackBarText, Snackbar.LENGTH_SHORT)
+                        .show()
+                }
             }
         }
 
-        val sectionsPagerAdapter = SectionsPagerAdapter(this, username!!)
-        val viewPager: ViewPager2 = findViewById(R.id.view_pager)
-        viewPager.adapter = sectionsPagerAdapter
-        val tabs: TabLayout = findViewById(R.id.tabs)
-        TabLayoutMediator(tabs, viewPager) { tab, position ->
-            tab.text = resources.getString(TAB_TITLES[position])
-        }.attach()
+        userFavoriteViewModel.getUserFavoriteByUsername(username ?: "")
+            .observe(this) { userFavorite ->
+                isUserFavoriteNotEmpty = userFavorite != null
+                if (isUserFavoriteNotEmpty) {
+                    activityUserDetailBinding.fabFavorite.setImageResource(R.drawable.ic_favorite)
+                } else {
+                    activityUserDetailBinding.fabFavorite.setImageResource(R.drawable.ic_favorite_border)
+                }
+            }
 
-        setSupportActionBar(activityUserDetailBinding.topAppBar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_arrow_back_ios)
-        supportActionBar?.elevation = 0f
+        activityUserDetailBinding.detailUserLayout.btnGithub.setOnClickListener {
+            val githubProfileUrl = "https://github.com/${userDetailResponse.login}".toUri()
+            Intent().apply {
+                action = Intent.ACTION_VIEW
+                data = githubProfileUrl
+                startActivity(this)
+            }
+        }
+
+        activityUserDetailBinding.fabFavorite.setOnClickListener {
+            val userFavorite =
+                UserFavorite(
+                    username = userDetailResponse.login ?: "-",
+                    avatarUrl = userDetailResponse.avatarUrl
+                )
+            if (isUserFavoriteNotEmpty) {
+                userFavoriteViewModel.deleteUserFavorite(userFavorite)
+            } else {
+                userFavoriteViewModel.insertUserFavorite(userFavorite)
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.share_menu, menu)
+        return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -70,25 +114,57 @@ class UserDetailActivity : AppCompatActivity() {
                 true
             }
 
-            else -> super.onOptionsItemSelected(item)
+            R.id.share_menu -> {
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        "GitGit Github User\nFull Name: ${userDetailResponse.name ?: "-"}\nUsername: ${userDetailResponse.login}\n${userDetailResponse.bio ?: "There is no bio"}"
+                    )
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+                true
+            }
+
+            else -> false
         }
     }
 
+    private fun setupSectionPager(username: String?) {
+        val sectionsPagerAdapter = SectionsPagerAdapter(this, username ?: "a")
+        val viewPager: ViewPager2 = findViewById(R.id.view_pager)
+        viewPager.adapter = sectionsPagerAdapter
+        val tabs: TabLayout = findViewById(R.id.tabs)
+        TabLayoutMediator(tabs, viewPager) { tab, position ->
+            tab.text = resources.getString(TAB_TITLES[position])
+        }.attach()
+    }
+
+    private fun setupAppBar() {
+        setSupportActionBar(activityUserDetailBinding.topAppBar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_arrow_back_ios)
+        supportActionBar?.elevation = 0f
+    }
+
     private fun setUserDetail(user: DetailUserResponse) {
-        val df = DecimalFormat("#,###")
         val detailUsername = "@${user.login}"
         val detailRepo = "${user.publicRepos} repository"
-        val detailFollow =
-            "${df.format(user.followers)} Followers - ${df.format(user.following)} Following"
         with(activityUserDetailBinding.detailUserLayout) {
-            Glide.with(root.context)
-                .load(user.avatarUrl)
-                .placeholder(ColorDrawable(Color.LTGRAY))
-                .into(detailUserAvatar)
+            detailUserAvatar.load(user.avatarUrl) {
+                placeholder(ColorDrawable(Color.LTGRAY))
+            }
             detailUserFullname.text = user.name ?: "-"
             detailUserUsername.text = detailUsername
             detailUserBio.text = user.bio ?: "There is no bio."
-            detailUserFollow.text = detailFollow
+            detailUserFollow.text = resources.getString(
+                R.string.followers_and_following,
+                user.followers.toDecimalFormat(),
+                user.following.toDecimalFormat()
+            )
             detailUserRepo.text = detailRepo
             detailUserLocation.text = user.location ?: "-"
         }

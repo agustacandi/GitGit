@@ -1,8 +1,8 @@
-package dev.agustacandi.learn.gitgit.data.retrofit
+package dev.agustacandi.learn.gitgit.data.remote.retrofit
 
-import dev.agustacandi.learn.gitgit.data.response.DetailUserResponse
-import dev.agustacandi.learn.gitgit.data.response.ItemsItem
-import dev.agustacandi.learn.gitgit.data.response.UserResponse
+import dev.agustacandi.learn.gitgit.data.remote.response.DetailUserResponse
+import dev.agustacandi.learn.gitgit.data.remote.response.ItemsItem
+import dev.agustacandi.learn.gitgit.data.remote.response.UserResponse
 import retrofit2.Call
 import retrofit2.http.*
 

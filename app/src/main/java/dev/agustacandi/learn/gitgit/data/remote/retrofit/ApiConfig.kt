@@ -1,4 +1,4 @@
-package dev.agustacandi.learn.gitgit.data.retrofit
+package dev.agustacandi.learn.gitgit.data.remote.retrofit
 
 import dev.agustacandi.learn.gitgit.BuildConfig
 import okhttp3.Interceptor

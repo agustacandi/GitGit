@@ -1,11 +1,10 @@
 package dev.agustacandi.learn.gitgit.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import dev.agustacandi.learn.gitgit.data.response.ItemsItem
-import dev.agustacandi.learn.gitgit.data.retrofit.ApiConfig
+import dev.agustacandi.learn.gitgit.data.remote.response.ItemsItem
+import dev.agustacandi.learn.gitgit.data.remote.retrofit.ApiConfig
 import dev.agustacandi.learn.gitgit.utils.Event
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,10 +18,14 @@ class FollowingViewModel : ViewModel() {
     private var _loader = MutableLiveData<Boolean>()
     val loader: LiveData<Boolean> = _loader
 
+    private val _notFollowingAnyoneText = MutableLiveData<String>()
+    val notFollowingAnyoneText: LiveData<String> = _notFollowingAnyoneText
+
     private val _snackbarText = MutableLiveData<Event<String>>()
     val snackbarText: LiveData<Event<String>> = _snackbarText
 
     fun getUserFollowingByUsername(username: String) {
+        _notFollowingAnyoneText.value = ""
         _loader.value = true
         val client = ApiConfig.getServiceApi().getUserFollowing(username)
         client.enqueue(object : Callback<List<ItemsItem>> {
@@ -33,6 +36,8 @@ class FollowingViewModel : ViewModel() {
                 _loader.value = false
                 if (response.isSuccessful) {
                     _listFollowing.value = response.body()
+                    _notFollowingAnyoneText.value =
+                        if (listFollowing.value!!.isEmpty()) "Not following anyone" else ""
                 } else {
                     _snackbarText.value = Event(response.message())
                 }

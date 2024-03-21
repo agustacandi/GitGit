@@ -10,7 +10,14 @@
     <string name="user_profile_picture">User Profile Picture</string>
     <string name="follow_icon_desc">Follow Icon</string>
     <string name="follow_tab_layout_desc">Follow Tab Layout</string>
-    <string name="username_not_found">Username not found.</string>
+    <string name="username_not_found">Username not found</string>
     <string name="detail">Detail</string>
     <string name="app_icon">App Icon</string>
+    <string name="settings">Settings</string>
+    <string name="floating_action_button">Floating Action Button</string>
+    <string name="light_mode_toggle">Light Mode Toggle</string>
+    <string name="dark_mode_toggle">Dark Mode Toggle</string>
+    <string name="share_button">Share Button</string>
+    <string name="view_on_github">View on GitHub</string>
+    <string name="followers_and_following">%1$s Followers - %2$s Following</string>
 </resources>

@@ -20,6 +20,7 @@
             android:background="?attr/colorPrimary"
             app:layout_collapseMode="pin"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
+            app:menu="@menu/home_menu"
             app:title="@string/app_name"
             app:titleTextAppearance="@style/ToolBarFont"
             app:titleTextColor="?colorOnPrimary" />

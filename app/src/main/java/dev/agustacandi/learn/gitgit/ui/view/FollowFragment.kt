@@ -9,7 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
-import dev.agustacandi.learn.gitgit.data.adapter.ListUserAdapter
+import dev.agustacandi.learn.gitgit.adapter.ListUserAdapter
 import dev.agustacandi.learn.gitgit.databinding.FragmentFollowBinding
 import dev.agustacandi.learn.gitgit.ui.viewmodel.FollowersViewModel
 import dev.agustacandi.learn.gitgit.ui.viewmodel.FollowingViewModel
@@ -78,6 +78,9 @@ class FollowFragment : Fragment() {
             if (listFollowers.value == null) {
                 getUserFollowersByUsername(_username!!)
             }
+            noFollowersText.observe(viewLifecycleOwner) {
+                binding?.tvFollowNotFound?.text = it
+            }
             listFollowers.observe(viewLifecycleOwner) {
                 adapter.submitList(it)
                 binding?.rvFollow?.adapter = adapter
@@ -94,6 +97,9 @@ class FollowFragment : Fragment() {
             listFollowing.observe(viewLifecycleOwner) {
                 adapter.submitList(it)
                 binding?.rvFollow?.adapter = adapter
+            }
+            notFollowingAnyoneText.observe(viewLifecycleOwner) {
+                binding?.tvFollowNotFound?.text = it
             }
             loader.observe(viewLifecycleOwner) {
                 showLoader(it)

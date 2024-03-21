@@ -1,4 +1,4 @@
-package dev.agustacandi.learn.gitgit.data.adapter
+package dev.agustacandi.learn.gitgit.adapter
 
 import android.content.Intent
 import android.graphics.Color
@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import dev.agustacandi.learn.gitgit.data.response.ItemsItem
+import coil.load
+import dev.agustacandi.learn.gitgit.data.remote.response.ItemsItem
 import dev.agustacandi.learn.gitgit.databinding.ItemUserBinding
 import dev.agustacandi.learn.gitgit.ui.view.UserDetailActivity
 
@@ -21,16 +21,16 @@ class ListUserAdapter : ListAdapter<ItemsItem, ListUserAdapter.MyViewHolder>(DIF
         fun bind(user: ItemsItem) {
             val bundle = Bundle()
             bundle.putString("username", user.login)
-
-            Glide.with(binding.root)
-                .load(user.avatarUrl)
-                .placeholder(ColorDrawable(Color.LTGRAY))
-                .into(binding.itemUserAvatar)
-            binding.itemUserName.text = user.login
-            binding.root.setOnClickListener { view ->
-                Intent(view.context, UserDetailActivity::class.java).apply {
-                    putExtras(bundle)
-                    view.context.startActivity(this)
+            with(binding) {
+                itemUserAvatar.load(user.avatarUrl) {
+                    placeholder(ColorDrawable(Color.LTGRAY))
+                }
+                itemUserName.text = user.login
+                root.setOnClickListener { view ->
+                    Intent(view.context, UserDetailActivity::class.java).apply {
+                        putExtras(bundle)
+                        view.context.startActivity(this)
+                    }
                 }
             }
         }

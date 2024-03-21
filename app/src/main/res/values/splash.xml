@@ -3,6 +3,6 @@
     <style name="SplashAPI" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_github</item>
-        <item name="postSplashScreenTheme">@style/Base.Theme.GitGit</item>
+        <item name="postSplashScreenTheme">@style/Theme.GitGit</item>
     </style>
 </resources>

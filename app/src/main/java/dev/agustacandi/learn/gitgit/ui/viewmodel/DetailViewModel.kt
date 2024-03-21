@@ -1,11 +1,10 @@
 package dev.agustacandi.learn.gitgit.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import dev.agustacandi.learn.gitgit.data.response.DetailUserResponse
-import dev.agustacandi.learn.gitgit.data.retrofit.ApiConfig
+import dev.agustacandi.learn.gitgit.data.remote.response.DetailUserResponse
+import dev.agustacandi.learn.gitgit.data.remote.retrofit.ApiConfig
 import dev.agustacandi.learn.gitgit.utils.Event
 import retrofit2.Call
 import retrofit2.Callback
@@ -33,7 +32,7 @@ class DetailViewModel : ViewModel() {
                 _loader.value = false
                 if (response.isSuccessful) {
                     _userDetail.value = response.body()
-                }else {
+                } else {
                     _snackbarText.value = Event(response.message())
                 }
             }
